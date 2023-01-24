@@ -1,6 +1,18 @@
 ﻿
 class Program {
   public static void Main() {
+    Simple();
+  }
+
+  private static void Simple() {
+    var source = Enumerable.Range(1, 10);
+    var acoll = source.Select(trace).Where(x => x < 5);
+    foreach (var item in acoll) {
+      Console.WriteLine($"item : {item}");
+    }
+  }
+
+  void Combined() {
     var source = Enumerable.Range(1, 5);
 
     try {
@@ -16,6 +28,7 @@ class Program {
       Console.WriteLine(e.StackTrace);
     }
 
-    T fail<T>(T val) =>throw new Exception();
   }
+  static T trace<T>(T val) { Console.WriteLine($"trace : {val}"); return val; }
+  static T fail<T>(T val) => throw new Exception();
 }

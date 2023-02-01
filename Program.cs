@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 
-new MyQueryable<int>().Select(x=>x).Where(x=>x<100).Count();
+new MyQueryable<int>().Select(x => x).Where(x => x < 100).Count();
 // var q = from t in new MyQueryable<int>()
 //         join u in new MyQueryable<Wrapper<int>>() on t equals u.Value
 //         into UGroup
@@ -15,12 +15,32 @@ new MyQueryable<int>().Select(x=>x).Where(x=>x<100).Count();
 // q.Sum();
 
 // record class Wrapper<T>(T Value);
+IEnumerable<string> listStr = "a new world".Split(), filtered, upper;
+filtered = from str in listStr
+           where str.Length > 1
+           select str;
+upper = from str in filtered
+        select str.ToUpper();
 
+filtered = listStr.Where(x => x.Length > 1);
+upper = filtered.Select(x => x.ToUpper());
+
+(from str in new MyQueryable<string>()
+ from word in str.Split(' ', StringSplitOptions.None)
+ select word).ToList();
+
+// from person in people
+// join pet in pets on person equals pet.Owner
+// into personPets
+// select new {
+//     OwnerName = person.FirstName,
+//     Pets = personPets
+// };
 
 public class MyQueryable<T> : IOrderedQueryable<T> {
-  public MyQueryable() : this(new QueryProvider(), null) {}
+  public MyQueryable() : this(new QueryProvider(), null) { }
 
-  public MyQueryable(IQueryProvider provider) : this(provider, null) {}
+  public MyQueryable(IQueryProvider provider) : this(provider, null) { }
 
   internal MyQueryable(IQueryProvider provider, Expression? expression) {
     if (provider == null)
@@ -34,11 +54,11 @@ public class MyQueryable<T> : IOrderedQueryable<T> {
 
   public IEnumerator<T> GetEnumerator() =>
    (Provider.Execute<IEnumerable<T>>(Expression)).GetEnumerator();
-  
+
 
   System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
     => (Provider.Execute<System.Collections.IEnumerable>(Expression)).GetEnumerator();
-  
+
 
   public Type ElementType { get => typeof(T); }
 
@@ -88,13 +108,13 @@ public class QueryProvider : IQueryProvider {
     return text;
   }
 
-#region piping
+  #region piping
   private T MkEnum<T>() => (T)MkEnum(typeof(T));
   private object? MkEnum(Type type) {
     var enumType = getEnumType(type);
     if (enumType != null)
       return typeof(Enumerable).GetMethod("Empty")!.MakeGenericMethod(new Type[] { getEnumType(type) }).Invoke(null, new object[0]);
-    if (type.IsValueType) 
+    if (type.IsValueType)
       return Activator.CreateInstance(type);
     return null;
   }
@@ -110,5 +130,5 @@ public class QueryProvider : IQueryProvider {
       return x.IsInterface && x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IEnumerable<>);
     }
   }
-#endregion
+  #endregion
 }

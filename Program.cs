@@ -15,19 +15,19 @@ new MyQueryable<int>().Select(x => x).Where(x => x < 100).Count();
 // q.Sum();
 
 // record class Wrapper<T>(T Value);
-IEnumerable<string> listStr = "a new world".Split(), filtered, upper;
-filtered = from str in listStr
-           where str.Length > 1
-           select str;
-upper = from str in filtered
-        select str.ToUpper();
+// IEnumerable<string> listStr = "a new world".Split(), filtered, upper;
+// filtered = from str in listStr
+//            where str.Length > 1
+//            select str;
+// upper = from str in filtered
+//         select str.ToUpper();
 
-filtered = listStr.Where(x => x.Length > 1);
-upper = filtered.Select(x => x.ToUpper());
+// filtered = listStr.Where(x => x.Length > 1);
+// upper = filtered.Select(x => x.ToUpper());
 
-(from str in new MyQueryable<string>()
- from word in str.Split(' ', StringSplitOptions.None)
- select word).ToList();
+// (from str in new MyQueryable<string>()
+//  from word in str.Split(' ', StringSplitOptions.None)
+//  select word).ToList();
 
 // from person in people
 // join pet in pets on person equals pet.Owner

@@ -1,7 +1,7 @@
 ﻿
 class Program {
   public static void Main() {
-    Simple();
+    Combined();
   }
 
   private static void Simple() {
@@ -12,7 +12,7 @@ class Program {
     }
   }
 
-  void Combined() {
+  static void Combined() {
     var source = Enumerable.Range(1, 5);
 
     try {

@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
@@ -10,75 +11,49 @@ public class Bench {
   [Params(10_000L,100_000L,1_000_000L)]
   public int Count { get; set; }
   ImmutableArray<int> test = ImmutableArray<int>.Empty;
-  int[] items;
+  int[]? items;
+  Dictionary<string, int>? d;
+  ImmutableDictionary<string, int>? id ;
+  FrozenDictionary<string, int>? fd ;
+  
 
   [GlobalSetup]
   public void BenchSetup() {
     items = new int[Count];
     Array.Fill(items, 0x12345678); // Range(1, Count).ToArray();
+    var set = Enumerable.Range(0, Count).Select(i => new KeyValuePair<string, int>(i.ToString(), 31*i%17)).ToArray();
+    d = new Dictionary<string, int>(set);
+    fd = d.ToFrozenDictionary();
+    id = d.ToImmutableDictionary();
   }
 
   [Benchmark]
-  // [MethodImpl(MethodImplOptions.NoOptimization)]
-  public long BuildListTest() {
-    long i=0L;
-    foreach (var item in BuildList())
-      i+=item;
-    return i;
-  }
-  public ImmutableList<int> BuildList() {
-    var b = ImmutableList<int>.Empty.ToBuilder();
-    b.AddRange(items);
-    return b.ToImmutable();
+  public void LookupFrozenDict() {
+    var dict = fd[Random.Shared.Next(Count).ToString()];
   }
 
   [Benchmark]
-  // [MethodImpl(MethodImplOptions.NoOptimization)]
-  public long AddRangeListTest() {
-    long i=0L;
-    foreach (var item in AddRangeList())
-      i+=item;
-    return i;
-  }
-  public ImmutableList<int> AddRangeList() {
-    var b = ImmutableList<int>.Empty;
-    b=b.AddRange(items);
-    return b;
+  public void LookupDict() {
+    var dict = d[Random.Shared.Next(Count).ToString()];
   }
   [Benchmark]
-  // [MethodImpl(MethodImplOptions.NoOptimization)]
-  public long AddListTest() {
-    long i=0L;
-    foreach (var item in AddList())
-      i+=item;
-    return i;
+  public void LookupImmutableDict() {
+    var dict = id[Random.Shared.Next(Count).ToString()];
   }
-  public ImmutableList<int> AddList() {
-    var b = ImmutableList<int>.Empty;
-    foreach (var i in items)
-      b=b.Add(i);
-    return b;
+  
+  [Benchmark]
+  public void  BuildDictTest() {
+    var dict = new Dictionary<string, int>(d!);
   }
 
   [Benchmark]
-  // [MethodImpl(MethodImplOptions.NoOptimization)]
- 
-  public long AddMutableListTest() {
-    long i=0L;
-    foreach (var item in AddMutableList())
-      i+=item;
-    return i;
-  } public List<int> AddMutableList() {
-    var b = new List<int>();
-    foreach (var i in items)
-      b.Add(i);
-    return b;
+  public void  BuildFrozenDictTest() {
+    var dict = d!.ToFrozenDictionary();
   }
 
-  // [MethodImpl(MethodImplOptions.NoOptimization)]
-  IEnumerable<int> Range(int start, int count){
-    while(0<count) {
-      yield return start++;
-    }
+  [Benchmark]
+  public void BuildImmutableDictTest() {
+    var dict = d!.ToImmutableDictionary();
   }
+
 }
